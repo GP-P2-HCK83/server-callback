@@ -104,4 +104,193 @@ Make the positioning strategic and fun for ${config.description} gameplay.
       return null;
     }
   }
+
+  generateAlgorithmically(config) {
+    console.log(
+      `🎲 Generating ${config.ladders} ladders and ${config.snakes} snakes algorithmically...`
+    );
+
+    const usedPositions = new Set([1, 100]); // Reserve start and finish
+    const snakes = {};
+    const ladders = {};
+
+    // Generate ladders first (they're more beneficial)
+    for (let i = 0; i < config.ladders; i++) {
+      let attempts = 0;
+      while (attempts < 50) {
+        const start = Math.floor(Math.random() * 70) + 2; // Positions 2-71
+        const end = start + Math.floor(Math.random() * 25) + 10; // At least 10 positions up
+
+        if (end <= 99 && !usedPositions.has(start) && !usedPositions.has(end)) {
+          ladders[start] = end;
+          usedPositions.add(start);
+          usedPositions.add(end);
+          break;
+        }
+        attempts++;
+      }
+    }
+
+    // Generate snakes
+    for (let i = 0; i < config.snakes; i++) {
+      let attempts = 0;
+      while (attempts < 50) {
+        const start = Math.floor(Math.random() * 70) + 25; // Positions 25-94
+        const end = Math.floor(Math.random() * (start - 10)) + 2; // At least 10 positions down
+
+        if (end >= 2 && !usedPositions.has(start) && !usedPositions.has(end)) {
+          snakes[start] = end;
+          usedPositions.add(start);
+          usedPositions.add(end);
+          break;
+        }
+        attempts++;
+      }
+    }
+
+    const board = { snakes, ladders };
+    console.log(
+      `✅ Generated board with ${Object.keys(ladders).length} ladders and ${
+        Object.keys(snakes).length
+      } snakes`
+    );
+    return board;
+  }
+
+  validateBoard(board, config) {
+    if (!board.snakes || !board.ladders) return false;
+
+    const snakeCount = Object.keys(board.snakes).length;
+    const ladderCount = Object.keys(board.ladders).length;
+
+    // Allow some flexibility in counts (±2)
+    const snakeCountValid = Math.abs(snakeCount - config.snakes) <= 2;
+    const ladderCountValid = Math.abs(ladderCount - config.ladders) <= 2;
+
+    if (!snakeCountValid || !ladderCountValid) {
+      console.log(
+        `❌ Board validation failed: expected ${config.ladders} ladders, got ${ladderCount}; expected ${config.snakes} snakes, got ${snakeCount}`
+      );
+      return false;
+    }
+
+    // Check for valid positions and no overlaps
+    const allPositions = new Set();
+
+    for (const [start, end] of Object.entries(board.snakes)) {
+      const startNum = parseInt(start);
+      const endNum = parseInt(end);
+      if (
+        startNum <= endNum ||
+        startNum < 2 ||
+        startNum > 99 ||
+        endNum < 2 ||
+        endNum > 99
+      ) {
+        return false;
+      }
+      if (allPositions.has(startNum) || allPositions.has(endNum)) {
+        return false;
+      }
+      allPositions.add(startNum);
+      allPositions.add(endNum);
+    }
+
+    for (const [start, end] of Object.entries(board.ladders)) {
+      const startNum = parseInt(start);
+      const endNum = parseInt(end);
+      if (
+        startNum >= endNum ||
+        startNum < 2 ||
+        startNum > 99 ||
+        endNum < 2 ||
+        endNum > 99
+      ) {
+        return false;
+      }
+      if (allPositions.has(startNum) || allPositions.has(endNum)) {
+        return false;
+      }
+      allPositions.add(startNum);
+      allPositions.add(endNum);
+    }
+
+    return true;
+  }
+
+  // Generate a set of preset boards for immediate use
+  getPresetBoards() {
+    return {
+      easy: {
+        snakes: {
+          23: 8,
+          47: 15,
+          72: 51,
+          89: 67,
+          98: 79,
+        },
+        ladders: {
+          3: 22,
+          8: 31,
+          15: 44,
+          21: 42,
+          28: 56,
+          36: 77,
+          51: 67,
+          62: 81,
+          71: 91,
+          78: 98,
+          84: 95,
+          87: 94,
+        },
+      },
+      moderate: {
+        snakes: {
+          16: 6,
+          47: 26,
+          56: 34,
+          62: 19,
+          64: 39,
+          87: 24,
+          93: 55,
+          98: 78,
+        },
+        ladders: {
+          1: 38,
+          4: 14,
+          9: 31,
+          21: 42,
+          28: 84,
+          36: 57,
+          51: 67,
+          71: 91,
+        },
+      },
+      hard: {
+        snakes: {
+          17: 3,
+          22: 5,
+          34: 12,
+          42: 18,
+          48: 11,
+          54: 31,
+          67: 29,
+          76: 25,
+          89: 46,
+          92: 73,
+          95: 56,
+          99: 68,
+        },
+        ladders: {
+          7: 27,
+          15: 35,
+          24: 43,
+          39: 58,
+          65: 85,
+        },
+      },
+    };
+  }
 }
+
+module.exports = BoardGenerator;
