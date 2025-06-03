@@ -379,3 +379,14 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+setInterval(() => {
+  const now = new Date();
+  for (const [gameId, game] of games) {
+    const gameAge = now - game.createdAt;
+    if (gameAge > 24 * 60 * 60 * 1000) {
+      // 24 hours
+      games.delete(gameId);
+    }
+  }
+}, 60 * 60 * 1000); // Check every hour
