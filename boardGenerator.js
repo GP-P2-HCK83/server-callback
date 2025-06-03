@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+require("dotenv").config()
 
 // Initialize Gemini AI (you'll need to set your API key)
 const genAI = new GoogleGenerativeAI(
@@ -7,7 +8,7 @@ const genAI = new GoogleGenerativeAI(
 
 class BoardGenerator {
   constructor() {
-    this.model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    this.model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   }
 
   /**
