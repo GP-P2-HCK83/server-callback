@@ -52,4 +52,56 @@ class BoardGenerator {
     };
     return configs[difficulty] || configs.moderate;
   }
+
+  async generateWithAI(config) {
+    const prompt = `
+Generate a Snake and Ladders board layout for ${config.description} difficulty.
+
+Requirements:
+- Board size: 10x10 (positions 1-100)
+- ${config.ladders} ladders that help players climb up
+- ${config.snakes} snakes that send players down
+- Ladders should start from lower positions and end at higher positions
+- Snakes should start from higher positions and end at lower positions
+- No overlapping start/end positions
+- Avoid positions 1 (start) and 100 (finish)
+- Strategic placement for balanced gameplay
+
+Return ONLY a valid JSON object in this exact format:
+{
+  "snakes": {
+    "16": 6,
+    "47": 26
+  },
+  "ladders": {
+    "4": 14,
+    "9": 21
+  }
+}
+
+Make the positioning strategic and fun for ${config.description} gameplay.
+`;
+
+    try {
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      // Extract JSON from the response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const board = JSON.parse(jsonMatch[0]);
+
+        // Validate the board
+        if (this.validateBoard(board, config)) {
+          console.log(`✅ AI-generated ${Object.keys(config)} board:`, board);
+          return board;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error("AI generation error:", error);
+      return null;
+    }
+  }
 }
