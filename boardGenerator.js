@@ -35,4 +35,21 @@ class BoardGenerator {
       return this.generateAlgorithmically(difficultyConfig);
     }
   }
+
+  getDifficultyConfig(difficulty) {
+    const configs = {
+      easy: {
+        ladders: 12,
+        snakes: 5,
+        description: "beginner-friendly with more ladders",
+      },
+      moderate: { ladders: 8, snakes: 8, description: "balanced gameplay" },
+      hard: {
+        ladders: 5,
+        snakes: 12,
+        description: "challenging with more snakes",
+      },
+    };
+    return configs[difficulty] || configs.moderate;
+  }
 }
