@@ -7,10 +7,7 @@ const BoardGenerator = require("./boardGenerator");
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
-    methods: ["GET", "POST"],
-  },
+  cors: "*",
 });
 
 app.use(cors());
@@ -376,8 +373,8 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
-if(process.env.NODE_ENV !== 'production') {
-    require('dotenv').config()
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
 }
 
 server.listen(PORT, () => {
